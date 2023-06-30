@@ -39,12 +39,10 @@ class Parser {
     str = String(str);
     const tokens = this.tokenizer.tokenize(str);
     const ast = this.astBuilder.buildAST(tokens);
-    return this.parseASTBranch(ast.properties[0]);
+    return this.parseASTBranch(ast.value);
   }
 
-  private parseASTBranch(
-    astBranch: ASTResult["properties"][number]
-  ): JSONResult {
+  private parseASTBranch(astBranch: ASTResult["value"]): JSONResult {
     if (astBranch.type === "OBJECT") {
       return this.parseObject(astBranch);
     }
@@ -67,7 +65,7 @@ class Parser {
   private parseObject(astBranch: ASTObject): JSONObject {
     const json: JSONObject = {};
     for (const property of astBranch.properties) {
-      json[property.name] = this.parseASTBranch(property.properties[0]);
+      json[property.name] = this.parseASTBranch(property.value);
     }
     return json;
   }

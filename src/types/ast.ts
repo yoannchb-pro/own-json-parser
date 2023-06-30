@@ -30,7 +30,7 @@ type ASTSimple = ASTNull | ASTString | ASTBoolean | ASTNumber;
 type ASTObjectKey = {
   type: "OBJECT_KEY";
   name: string;
-  properties: ASTSimple[];
+  value: ASTSimple;
 };
 
 type ASTObject = {
@@ -53,10 +53,18 @@ type ASTFinalValue =
 
 type ASTResult = {
   type: "JSON";
-  properties: ASTFinalValue[];
+  value: ASTFinalValue;
 };
 
 type ASTChildren = ASTResult | ASTArray | ASTObjectKey | ASTObject;
+type ASTAnyValue =
+  | ASTArray
+  | ASTBoolean
+  | ASTNull
+  | ASTNumber
+  | ASTObject
+  | ASTString
+  | ASTObjectKey;
 
 export {
   ASTArray,
@@ -69,4 +77,5 @@ export {
   ASTString,
   ASTResult,
   ASTChildren,
+  ASTAnyValue,
 };

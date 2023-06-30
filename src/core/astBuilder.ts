@@ -1,4 +1,5 @@
 import type {
+  ASTAnyValue,
   ASTArray,
   ASTBoolean,
   ASTChildren,
@@ -78,7 +79,7 @@ class ASTBuilder {
     return {
       type: "OBJECT_KEY",
       name: this.formatStr(token.value),
-      properties: [],
+      value: null,
     };
   }
 
@@ -88,7 +89,7 @@ class ASTBuilder {
    * @returns
    */
   buildAST(tokens: TokenizerResult[]) {
-    const tree: ASTResult = { type: "JSON", properties: [] };
+    const tree: ASTResult = { type: "JSON", value: null };
     const childrens: any[] = [tree];
 
     let lastScannedToken = null;
@@ -96,30 +97,38 @@ class ASTBuilder {
       const actualToken = tokens[i];
       const actualChild = childrens[childrens.length - 1];
 
+      const addASTBranch = (branch: ASTAnyValue) => {
+        if ("value" in actualChild) {
+          if (actualChild.value !== null)
+            throw new SyntaxError(this.getErrorMessage(actualToken));
+          actualChild.value = branch;
+        } else actualChild.properties.push(branch);
+      };
+
       if (actualToken.type === "UNKNOWN") {
         throw new SyntaxError(this.getErrorMessage(actualToken));
       } else if (
         actualToken.type === "TRUE_BOOLEAN" ||
         actualToken.type === "FALSE_BOOLEAN"
       ) {
-        actualChild.properties.push(this.appendBoolean(actualToken));
+        addASTBranch(this.appendBoolean(actualToken));
       } else if (actualToken.type === "NULL") {
-        actualChild.properties.push(this.appendNullValue(actualToken));
+        addASTBranch(this.appendNullValue(actualToken));
       } else if (actualToken.type === "NUMBER") {
-        actualChild.properties.push(this.appendNumber(actualToken));
+        addASTBranch(this.appendNumber(actualToken));
       } else if (actualToken.type === "STRING") {
         if (actualChild.type === "OBJECT") {
           const child = this.appendKey(actualToken);
-          actualChild.properties.push(child);
+          addASTBranch(child);
           childrens.push(child);
-        } else actualChild.properties.push(this.appendString(actualToken));
+        } else addASTBranch(this.appendString(actualToken));
       } else if (actualToken.type === "START_BRACKET") {
         const child = this.appendArray(actualToken);
-        actualChild.properties.push(child);
+        addASTBranch(child);
         childrens.push(child);
       } else if (actualToken.type === "START_BRACE") {
         const child = this.appendObject(actualToken);
-        actualChild.properties.push(child);
+        addASTBranch(child);
         childrens.push(child);
       } else if (actualToken.type === "END_BRACKET") {
         if (
@@ -160,9 +169,6 @@ class ASTBuilder {
       }
 
       if (actualToken.type !== "WHITE_SPACE") lastScannedToken = actualToken;
-
-      if (tree.properties.length > 1)
-        throw new SyntaxError(this.getErrorMessage(actualToken));
     }
 
     return tree;
