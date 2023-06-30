@@ -132,44 +132,53 @@ class ASTBuilder {
         childrens.push(child);
       } else if (actualToken.type === "END_BRACKET") {
         if (
-          actualChild.type === "ARRAY" &&
-          actualChild.properties.length % 2 !== 0
-        )
-          throw new SyntaxError(this.getErrorMessage(lastScannedToken));
-        if (actualChild.type !== "ARRAY")
-          throw new SyntaxError(this.getErrorMessage(actualToken));
-        childrens.pop();
-      } else if (actualToken.type === "END_BRACE") {
-        if (
-          actualChild.type === "OBJECT" &&
-          actualChild.properties.length % 2 !== 0
+          lastScannedToken.type === "COMA" ||
+          lastScannedToken.type === "COLON"
         )
           throw new SyntaxError(this.getErrorMessage(lastScannedToken));
 
-        if (actualChild.type === "OBJECT_KEY") {
-          childrens.pop();
-        }
+        if (actualChild.type !== "ARRAY")
+          throw new SyntaxError(this.getErrorMessage(actualToken));
+
+        childrens.pop();
+      } else if (actualToken.type === "END_BRACE") {
+        if (
+          lastScannedToken.type === "COMA" ||
+          lastScannedToken.type === "COLON"
+        )
+          throw new SyntaxError(this.getErrorMessage(lastScannedToken));
+
+        if (actualChild.type === "OBJECT_KEY") childrens.pop();
 
         if (childrens[childrens.length - 1].type !== "OBJECT")
           throw new SyntaxError(this.getErrorMessage(actualToken));
 
         childrens.pop();
       } else if (actualToken.type === "COMA") {
-        if (actualChild.type !== "OBJECT_KEY" && actualChild.type !== "ARRAY") {
+        if (actualChild.type !== "OBJECT_KEY" && actualChild.type !== "ARRAY")
           throw new SyntaxError(this.getErrorMessage(actualToken));
-        }
 
-        if (actualChild.type === "OBJECT_KEY") {
-          childrens.pop();
-        }
-      } else if (actualToken.type === "COLON") {
-        if (actualChild.type !== "OBJECT_KEY") {
+        if (
+          actualChild.type === "OBJECT_KEY" &&
+          (actualChild as any).value === null
+        )
           throw new SyntaxError(this.getErrorMessage(actualToken));
-        }
+
+        if (actualChild.type === "OBJECT_KEY") childrens.pop();
+      } else if (actualToken.type === "COLON") {
+        if (
+          actualChild.type !== "OBJECT_KEY" ||
+          (actualChild as any).value !== null
+        )
+          throw new SyntaxError(this.getErrorMessage(actualToken));
       }
 
       if (actualToken.type !== "WHITE_SPACE") lastScannedToken = actualToken;
     }
+
+    //Last children should be the tree
+    if (childrens.length !== 1)
+      throw new SyntaxError(this.getErrorMessage(lastScannedToken));
 
     return tree;
   }
