@@ -1,10 +1,3 @@
-type SimpleASTType =
-  | "STRING"
-  | "NUMBER"
-  | "NULL_VALUE"
-  | "TRUE_BOOLEAN"
-  | "FALSE_BOOLEAN";
-
 type ASTBoolean = {
   type: "BOOLEAN";
   value: boolean;

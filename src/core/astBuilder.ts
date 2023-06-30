@@ -57,7 +57,7 @@ class ASTBuilder {
   private appendArray(token: TokenizerResult): ASTArray {
     return {
       type: "ARRAY",
-      properties: [] as any,
+      properties: [],
     };
   }
 
@@ -90,7 +90,7 @@ class ASTBuilder {
    */
   buildAST(tokens: TokenizerResult[]) {
     const tree: ASTResult = { type: "JSON", value: null };
-    const childrens: any[] = [tree];
+    const childrens: ASTChildren[] = [tree];
 
     let lastScannedToken = null;
     for (let i = 0; i < tokens.length; ++i) {
@@ -101,8 +101,8 @@ class ASTBuilder {
         if ("value" in actualChild) {
           if (actualChild.value !== null)
             throw new SyntaxError(this.getErrorMessage(actualToken));
-          actualChild.value = branch;
-        } else actualChild.properties.push(branch);
+          (actualChild as any).value = branch;
+        } else actualChild.properties.push(branch as any);
       };
 
       if (actualToken.type === "UNKNOWN") {
