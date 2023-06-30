@@ -4,7 +4,7 @@
   "description": "A JSON parser made in typescript with tokenizer, ast, parser ...",
   "main": "./dist/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --colors",
     "build": "rollup -c"
   },
   "repository": {
@@ -28,8 +28,12 @@
   "homepage": "https://github.com/yoannchb-pro/own-json-parser#readme",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.3",
+    "@types/jest": "^29.5.2",
+    "@types/node": "^20.3.3",
+    "jest": "^29.5.0",
     "rollup": "^3.26.0",
     "rollup-plugin-ts": "^3.2.0",
+    "ts-jest": "^29.1.1",
     "typescript": "^4.9.5"
   }
 }

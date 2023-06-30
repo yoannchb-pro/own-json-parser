@@ -9,7 +9,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "declaration": true,
     "typeRoots": ["node_modules/@types"]
   },
