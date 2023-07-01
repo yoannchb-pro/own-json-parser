@@ -12,6 +12,18 @@ import type {
 } from "../types/ast";
 import type TokenizerResult from "../types/tokenizerResult";
 
+function unrawString(rawString: string) {
+  return rawString.replace(/\\(.)/g, function (_, char) {
+    if (char === "n") return "\n";
+    if (char === "r") return "\r";
+    if (char === "t") return "\t";
+    if (char === "b") return "\b";
+    if (char === "f") return "\f";
+    if (char === "v") return "\v";
+    return char;
+  });
+}
+
 class ASTBuilder {
   /**
    * Return the error message for a given token
@@ -28,9 +40,8 @@ class ASTBuilder {
    * @returns
    */
   private formatStr(str: string) {
-    return str
-      .substring(1, str.length - 1) //We remove useless quotes
-      .replace(/\\\\/g, "\\"); //TODO: Fixe this shit \\n -> \n
+    const content = str.substring(1, str.length - 1); //We remove useless quotes
+    return unrawString(content); // turn \\n into \n ...
   }
 
   private appendBoolean(token: TokenizerResult): ASTBoolean {
