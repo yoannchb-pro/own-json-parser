@@ -9,13 +9,28 @@ type MatcherResult = {
   wordLength: number;
 };
 
+type Options = {
+  tokens?: Tokens;
+  defaultType?: string;
+  callback?: (token: TokenizerResult) => TokenizerResult;
+  concatDefaultType?: boolean;
+};
+
+const defaultOptions: Options = {
+  defaultType: "UNKNOWN",
+  concatDefaultType: true,
+  callback: (token) => token,
+};
+
 /**
  * Tokenize any string with given tokens
  */
 class Tokenizer {
-  private defaultType = "UNKNOWN";
+  private options: Options = {};
 
-  constructor(private tokens: Tokens = {}) {}
+  constructor(options: Options = {}) {
+    this.options = Object.assign({}, defaultOptions, options);
+  }
 
   /**
    * Set the default type if no token was match
@@ -23,7 +38,7 @@ class Tokenizer {
    * @param type
    */
   setDefaultType(type: string) {
-    this.defaultType = type;
+    this.options.defaultType = type;
   }
 
   /**
@@ -31,7 +46,7 @@ class Tokenizer {
    * @returns
    */
   getDefaultType() {
-    return this.defaultType;
+    return this.options.defaultType;
   }
 
   /**
@@ -39,7 +54,7 @@ class Tokenizer {
    * @returns
    */
   getTokens() {
-    return this.tokens;
+    return this.options.tokens;
   }
 
   /**
@@ -48,7 +63,15 @@ class Tokenizer {
    * @param value
    */
   addToken(type: string, value: RegExp) {
-    this.tokens[type] = value;
+    this.options.tokens[type] = value;
+  }
+
+  /**
+   * Set the callback function called on each new token
+   * @param callback
+   */
+  setCallback(callback: Options["callback"]) {
+    this.options.callback = callback;
   }
 
   /**
@@ -62,7 +85,7 @@ class Tokenizer {
     value.lastIndex = 0;
     const match = value.exec(str);
     if (!match || match.index !== 0) {
-      return { type: this.defaultType, wordLength: 1 };
+      return { type: this.options.defaultType, wordLength: 1 };
     }
     return {
       type,
@@ -76,7 +99,7 @@ class Tokenizer {
    * @returns
    */
   tokenize(str: string): TokenizerResult[] {
-    const tokens = [];
+    const tokens: TokenizerResult[] = [];
     const lines = str.split(/\n/g);
 
     let totalCharDone = 0;
@@ -87,13 +110,13 @@ class Tokenizer {
         const charIndex = startColumn + totalCharDone;
 
         let result = null;
-        for (const [type, value] of Object.entries(this.tokens)) {
+        for (const [type, value] of Object.entries(this.options.tokens)) {
           result = this.matcher(
             str.substring(charIndex, str.length),
             type,
             value
           );
-          if (result.type !== this.defaultType) break;
+          if (result.type !== this.options.defaultType) break;
         }
 
         const matchedSentence = str.substring(
@@ -102,7 +125,7 @@ class Tokenizer {
         );
         const matchedSentenceLinesNumber =
           matchedSentence.match(/\n/g)?.length ?? 0;
-        tokens.push({
+        const token = this.options.callback({
           type: result.type,
           value: matchedSentence,
           startLine,
@@ -110,6 +133,17 @@ class Tokenizer {
           endLine: startLine + matchedSentenceLinesNumber,
           endColumn: startColumn + result.wordLength - 1, // -1 because we don't want the next char but the last letter of the token value
         });
+        if (
+          this.options.concatDefaultType &&
+          token.type === this.options.defaultType &&
+          tokens.length !== 0 &&
+          tokens[tokens.length - 1].type === this.options.defaultType
+        ) {
+          const lastToken = tokens[tokens.length - 1];
+          lastToken.value += token.value;
+          lastToken.endColumn = token.endColumn;
+          lastToken.endLine = token.endLine;
+        } else tokens.push(token);
         startColumn += result.wordLength - 1;
       }
 

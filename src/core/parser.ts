@@ -27,15 +27,24 @@ const TOKENS = {
  * JSON parser for a given string
  */
 class Parser {
-  private tokenizer = new Tokenizer(TOKENS);
+  private tokenizer = new Tokenizer({ tokens: TOKENS });
   private astBuilder = new ASTBuilder();
+
+  constructor() {
+    /* We handle directly during the tokenizer the error if we have an UNKNOWN property */
+    this.tokenizer.setCallback((token) => {
+      if (token.type === "UNKNOWN")
+        throw new SyntaxError(this.astBuilder.getErrorMessage(token));
+      return token;
+    });
+  }
 
   /**
    * Parse a JSON string and return the object
    * @param str
    * @returns
    */
-  parse(str: string): JSONResult {
+  parse(str: string | null | boolean | number): JSONResult {
     str = String(str);
     const tokens = this.tokenizer.tokenize(str);
     const ast = this.astBuilder.buildAST(tokens);

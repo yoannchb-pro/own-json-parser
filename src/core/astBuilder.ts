@@ -35,7 +35,7 @@ class ASTBuilder {
    * @param token
    * @returns
    */
-  private getErrorMessage(token: TokenizerResult) {
+  getErrorMessage(token: TokenizerResult) {
     return `"${token.value}" is not valid JSON\nline: ${token.startLine}, column: ${token.startColumn}`;
   }
 
@@ -121,9 +121,7 @@ class ASTBuilder {
         } else actualChild.properties.push(branch as any);
       };
 
-      if (actualToken.type === "UNKNOWN") {
-        throw new SyntaxError(this.getErrorMessage(actualToken));
-      } else if (
+      if (
         actualToken.type === "TRUE_BOOLEAN" ||
         actualToken.type === "FALSE_BOOLEAN"
       ) {
