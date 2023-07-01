@@ -17,3 +17,7 @@ JSONParser(
 JSONParser('{ "greeting": "Hello World !", "test": [,]  }');
 //Will throw a SyntaxError
 ```
+
+## TODO
+
+- [ ] Transform unicode `\\n -> \n`
