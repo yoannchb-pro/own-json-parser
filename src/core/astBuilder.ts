@@ -12,6 +12,11 @@ import type {
 } from "../types/ast";
 import type TokenizerResult from "../types/tokenizerResult";
 
+/**
+ * Unraw a string to transform for example \\n to \n
+ * @param rawString
+ * @returns
+ */
 function unrawString(rawString: string) {
   return rawString.replace(/\\(.)/g, function (_, char) {
     if (char === "n") return "\n";
