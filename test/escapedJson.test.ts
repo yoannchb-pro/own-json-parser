@@ -1,7 +1,7 @@
 import JSONParser from "../dist";
 
 const json = {
-  '"': true,
+  "\"": true,
   key: 'Yoann said "You are beautiful"',
   key2: "Line 1 \n Line 2",
 };

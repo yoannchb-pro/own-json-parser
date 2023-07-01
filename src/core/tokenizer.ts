@@ -77,13 +77,14 @@ class Tokenizer {
    */
   tokenize(str: string): TokenizerResult[] {
     const tokens = [];
-    const lines = str.split(/(\n)/g);
+    const lines = str.split(/\n/g);
 
+    let totalCharDone = 0;
     for (let startLine = 0; startLine < lines.length; ++startLine) {
       const line = lines[startLine];
 
       for (let startColumn = 0; startColumn < line.length; ++startColumn) {
-        const charIndex = (startLine + 1) * (startColumn + 1) - 1;
+        const charIndex = startColumn + totalCharDone;
 
         let result = null;
         for (const [type, value] of Object.entries(this.tokens)) {
@@ -95,16 +96,24 @@ class Tokenizer {
           if (result.type !== this.defaultType) break;
         }
 
+        const matchedSentence = str.substring(
+          charIndex,
+          charIndex + result.wordLength
+        );
+        const matchedSentenceLinesNumber =
+          matchedSentence.match(/\n/g)?.length ?? 0;
         tokens.push({
           type: result.type,
-          value: str.substring(charIndex, charIndex + result.wordLength),
+          value: matchedSentence,
           startLine,
           startColumn,
-          endLine: startLine,
+          endLine: startLine + matchedSentenceLinesNumber,
           endColumn: startColumn + result.wordLength - 1,
         });
         startColumn += result.wordLength - 1;
       }
+
+      totalCharDone += line.length + 1;
     }
 
     return tokens;
