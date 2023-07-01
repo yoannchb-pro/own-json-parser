@@ -15,5 +15,5 @@ JSONParser(
 //Ouput: { greeting: "Hello World !", error: false, note: 20, bool: "false" }
 
 JSONParser('{ "greeting": "Hello World !", "test": [,]  }');
-//Will throw an error
+//Will throw a SyntaxError
 ```
