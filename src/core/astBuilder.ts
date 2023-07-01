@@ -108,12 +108,25 @@ class ASTBuilder {
     const tree: ASTResult = { type: "JSON", value: null };
     const childrens: ASTChildren[] = [tree];
 
-    let lastScannedToken = null;
+    let lastScannedToken: TokenizerResult = null;
     for (let i = 0; i < tokens.length; ++i) {
       const actualToken = tokens[i];
       const actualChild = childrens[childrens.length - 1];
 
       const addASTBranch = (branch: ASTAnyValue) => {
+        if (
+          actualChild.type === "ARRAY" &&
+          lastScannedToken !== null &&
+          lastScannedToken.type !== "START_BRACKET" &&
+          lastScannedToken.type !== "COMA"
+        ) {
+          throw new SyntaxError(this.getErrorMessage(lastScannedToken));
+        }
+
+        if (actualChild.type === "OBJECT" && branch.type !== "OBJECT_KEY") {
+          throw new SyntaxError(this.getErrorMessage(actualToken));
+        }
+
         if ("value" in actualChild) {
           if (actualChild.value !== null)
             throw new SyntaxError(this.getErrorMessage(actualToken));
@@ -146,8 +159,8 @@ class ASTBuilder {
         childrens.push(child);
       } else if (actualToken.type === "END_BRACKET") {
         if (
-          lastScannedToken.type === "COMA" ||
-          lastScannedToken.type === "COLON"
+          lastScannedToken?.type === "COMA" ||
+          lastScannedToken?.type === "COLON"
         )
           throw new SyntaxError(this.getErrorMessage(lastScannedToken));
 
@@ -157,8 +170,8 @@ class ASTBuilder {
         childrens.pop();
       } else if (actualToken.type === "END_BRACE") {
         if (
-          lastScannedToken.type === "COMA" ||
-          lastScannedToken.type === "COLON"
+          lastScannedToken?.type === "COMA" ||
+          lastScannedToken?.type === "COLON"
         )
           throw new SyntaxError(this.getErrorMessage(lastScannedToken));
 
@@ -169,6 +182,12 @@ class ASTBuilder {
 
         childrens.pop();
       } else if (actualToken.type === "COMA") {
+        if (
+          lastScannedToken?.type === "COMA" ||
+          lastScannedToken?.type === "COLON"
+        )
+          throw new SyntaxError(this.getErrorMessage(actualToken));
+
         if (actualChild.type !== "OBJECT_KEY" && actualChild.type !== "ARRAY")
           throw new SyntaxError(this.getErrorMessage(actualToken));
 
@@ -181,6 +200,7 @@ class ASTBuilder {
         if (actualChild.type === "OBJECT_KEY") childrens.pop();
       } else if (actualToken.type === "COLON") {
         if (
+          lastScannedToken?.type !== "STRING" ||
           actualChild.type !== "OBJECT_KEY" ||
           (actualChild as any).value !== null
         )
