@@ -17,6 +17,7 @@ type Options = {
 };
 
 const defaultOptions: Options = {
+  tokens: {},
   defaultType: "UNKNOWN",
   concatDefaultType: true,
   callback: (token) => token,
