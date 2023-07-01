@@ -108,12 +108,12 @@ class Tokenizer {
           startLine,
           startColumn,
           endLine: startLine + matchedSentenceLinesNumber,
-          endColumn: startColumn + result.wordLength - 1,
+          endColumn: startColumn + result.wordLength - 1, // -1 because we don't want the next char but the last letter of the token value
         });
         startColumn += result.wordLength - 1;
       }
 
-      totalCharDone += line.length + 1;
+      totalCharDone += line.length + 1; // +1 because the \n have a length of 1 and is removed by the split
     }
 
     return tokens;
