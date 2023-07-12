@@ -10,7 +10,7 @@ import Tokenizer from "./tokenizer";
 
 const TOKENS = {
   STRING: /(")(?:\\\1|.)*?\1/,
-  NUMBER: /\d+(?:.\d+)?/,
+  NUMBER: /\d+(?:\.\d+)?/,
   WHITE_SPACE: /\s+/,
   COMA: /,/,
   COLON: /:/,

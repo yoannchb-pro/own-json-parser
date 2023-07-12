@@ -1,6 +1,6 @@
 {
   "name": "own-json-parser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A JSON parser made in typescript with tokenizer, ast, parser ...",
   "main": "./dist/index.js",
   "scripts": {
