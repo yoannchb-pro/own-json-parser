@@ -1,5 +1,6 @@
 import Parser from "./core/parser";
 
 const parser = new Parser();
+const JSONParser = parser.parse.bind(parser);
 
-export default parser.parse.bind(parser) as Parser["parse"];
+export default JSONParser;
